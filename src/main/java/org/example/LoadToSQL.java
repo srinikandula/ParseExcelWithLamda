@@ -9,6 +9,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -34,26 +35,27 @@ public class LoadToSQL {
         }
     }
 
-    public void readExcelData() throws IOException, SQLException {
+    public void readExcelData(InputStream inputStream) throws IOException, SQLException {
         String connectionUrl = "jdbc:mysql://localhost:3306/mydb?serverTimezone=UTC";
-        Connection conn = DriverManager.getConnection(connectionUrl, "root", "Ammuloki@3030");
+        Connection conn = DriverManager.getConnection(connectionUrl, "root", "password");
         Statement stmt = conn.createStatement();
-        String sqlCreateStmt = "CREATE TABLE Students (Name varchar(255),Age int,Place varchar(255));" ;
-        stmt.executeUpdate(sqlCreateStmt);
+       /* String sqlCreateStmt = "CREATE TABLE Students (Name varchar(255),Age int,Place varchar(255));" ;
+        stmt.executeUpdate(sqlCreateStmt);*/
         // Try block to check for exceptions
         ArrayList<String> columns = new ArrayList<>();
         try {
             // Reading file from local directory
-            FileInputStream file = new FileInputStream(
-                    new File("C:\\Users\\KALYANI\\Documents\\excel1.xlsx"));
-            // Create Workbook instance holding reference to
-            // .xlsx file
-            XSSFWorkbook workbook = new XSSFWorkbook(file);
+           /* FileInputStream file = new FileInputStream(
+                    new File("C:\\Users\\KALYANI\\Documents\\excel1.xlsx"));*/
+            // Create Workbook instance holding reference to .xlsx file
+            XSSFWorkbook workbook = new XSSFWorkbook(inputStream);
             // Get first/desired sheet from the workbook
             XSSFSheet sheet = workbook.getSheetAt(0);
             // Iterate through each rows one by one
             Iterator<Row> rowIterator = sheet.iterator();
             int rowVal = 1;
+            String columnsStr1 = "";
+            String columnsStr2 = "";
             // Till there is an element condition holds true
             while (rowIterator.hasNext()) {
                 ArrayList<String> cellValues = new ArrayList<>();
@@ -70,13 +72,37 @@ public class LoadToSQL {
                     switch (evaluator.evaluateInCell(cell).getCellType()) {
                         // Case 1
                         case NUMERIC:
-                            cellValues.add(String.valueOf(cell.getNumericCellValue()));
+                            if(rowVal == 1){
+                                columns.add(String.valueOf(cell.getNumericCellValue()));
+                            }else{
+                                cellValues.add(String.valueOf(cell.getNumericCellValue()));
+                            }
                             break;
                         // Case 2
                         case STRING:
-                            cellValues.add("'"+cell.getStringCellValue()+"'");
+                            if(rowVal == 1){
+                                columns.add(cell.getStringCellValue());
+                            }else{
+                                cellValues.add("'"+cell.getStringCellValue()+"'");
+                            }
                             break;
                     }
+                }
+                //extract column names from row and create table
+                if(rowVal == 1){
+                    // Name varchar(255),Age int,Place varchar(255)
+                    //varchar(255)
+                    for(int i=0;i<columns.size();i++){
+                        if(i == columns.size()-1){
+                            columnsStr1 += columns.get(i)+" varchar(255)";
+                            columnsStr2 += columns.get(i);
+                        }else{
+                            columnsStr1 += columns.get(i)+" varchar(255)"+",";
+                            columnsStr2 += columns.get(i)+",";
+                        }
+                    }
+                    String sqlCreateStmt = "CREATE TABLE exceldata ("+columnsStr1+");" ;
+                    stmt.executeUpdate(sqlCreateStmt);
                 }
                 //insert each row into table
                 if(rowVal != 1){
@@ -88,13 +114,13 @@ public class LoadToSQL {
                         }
 
                     }
-                    insertQuery = "INSERT INTO Students (Name,Age,Place) VALUES ("+cellValuesStr+");";
+                    insertQuery = "INSERT INTO exceldata ("+columnsStr2+") VALUES ("+cellValuesStr+");";
                     stmt.executeUpdate(insertQuery);
                 }
                 rowVal ++;
             }
             // Closing file output streams
-            file.close();
+            inputStream.close();
         }
         // Catch block to handle exceptions
         catch (Exception e) {

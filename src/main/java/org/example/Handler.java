@@ -18,6 +18,7 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.SQLException;
 import java.util.Map;
 
 public class Handler implements RequestHandler<S3Event, String>{
@@ -48,9 +49,12 @@ public class Handler implements RequestHandler<S3Event, String>{
         return response;
     }
 
-    public static void main(String[] args) {
-        Handler handler = new Handler();
-        handler.handleRequest(null, null);
+    public static void main(String[] args) throws SQLException, IOException {
+        /*Handler handler = new Handler();
+        handler.handleRequest(null, null);*/
+
+        LoadToSQL loadToSQL = new LoadToSQL();
+        loadToSQL.readExcelData(null);
     }
 }
 
