@@ -1,4 +1,5 @@
 package org.example;
+import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.MongoClient;
@@ -8,6 +9,8 @@ import org.bson.Document;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import org.apache.poi.ss.usermodel.Cell;
@@ -17,13 +20,13 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 public class LoadToMongoDB {
     public static String COLLECTION_NAME = "clientData";
-    public void loadToMongo(){
+    public void loadToMongo(InputStream is, LambdaLogger logger) throws IOException {
         // Creating a Mongo client
         MongoClient mongo = new MongoClient( "localhost" , 27017 );
 
         // Creating Credentials
         MongoCredential credential = MongoCredential.createCredential("sampleUser", "myDb", "password".toCharArray());
-        System.out.println("Connected to the database successfully");
+        logger.log("Connected to the database successfully");
 
         //Accessing the database
         MongoDatabase database = mongo.getDatabase("myDb");
@@ -33,27 +36,22 @@ public class LoadToMongoDB {
         try{
             database.createCollection(COLLECTION_NAME);
         }catch (Exception e) {
-           // e.printStackTrace();
+            e.printStackTrace();
+            logger.log("Error "+ e.getMessage());
+        } finally {
+            is.close();
         }
-        readExcelData(database,COLLECTION_NAME);
-        /*Document document = new Document();
-        document.append("name", "Ram");
-        document.append("age", 26);
-        document.append("city", "Hyderabad");
-        database.getCollection(COLLECTION_NAME).insertOne(document);*/
+        readExcelData(database,COLLECTION_NAME, is);
         System.out.println("DONE");
+
     }
 
-    private void readExcelData(MongoDatabase database,String COLLECTION_NAME){
+    private void readExcelData(MongoDatabase database, String COLLECTION_NAME, InputStream is){
         // Try block to check for exceptions
         ArrayList<String> columns = new ArrayList<>();
         try {
-            // Reading file from local directory
-            FileInputStream file = new FileInputStream(
-                    new File("C:\\Users\\KALYANI\\Documents\\excel1.xlsx"));
-            // Create Workbook instance holding reference to
-            // .xlsx file
-            XSSFWorkbook workbook = new XSSFWorkbook(file);
+
+            XSSFWorkbook workbook = new XSSFWorkbook(is);
             // Get first/desired sheet from the workbook
             XSSFSheet sheet = workbook.getSheetAt(0);
             // Iterate through each rows one by one
@@ -98,13 +96,9 @@ public class LoadToMongoDB {
                 }
                 rowVal ++;
             }
-            // Closing file output streams
-            file.close();
         }
         // Catch block to handle exceptions
         catch (Exception e) {
-            // Display the exception along with line number
-            // using printStackTrace() method
             e.printStackTrace();
         }
     }

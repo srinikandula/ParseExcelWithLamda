@@ -3,6 +3,7 @@ package org.example;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.services.dynamodbv2.xspec.L;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
@@ -37,6 +38,8 @@ public class Handler implements RequestHandler<S3Event, String>{
         S3ObjectInputStream data = result.getObjectContent();
         try {
             InputStream stream = new ByteArrayInputStream(IOUtils.toByteArray(data));
+            LoadToMongoDB loadToMongoDB = new LoadToMongoDB();
+            loadToMongoDB.loadToMongo(stream, logger);
             logger.log("read from file now");
         } catch (IOException e) {
             e.printStackTrace();
