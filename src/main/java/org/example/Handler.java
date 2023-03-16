@@ -27,8 +27,8 @@ public class Handler implements RequestHandler<S3Event, String>{
         S3EventNotification.S3EventNotificationRecord record = event.getRecords().get(0);
         String s3Bucket = record.getS3().getBucket().getName();
         String filePath = record.getS3().getObject().getKey();
-        String awsAccessKey = "AKIAY6C7CZZXHLLDM7X7";
-        String awsSecretKey = "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";
+        String awsAccessKey = "";
+        String awsSecretKey = "";
         logger.log("got file "+ filePath +" from bucket " + s3Bucket);
         AWSCredentials credentials = new BasicAWSCredentials(awsAccessKey, awsSecretKey);
         AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
