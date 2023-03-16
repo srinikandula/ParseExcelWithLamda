@@ -9,26 +9,13 @@
   <packaging>jar</packaging>
   <version>1.0-SNAPSHOT</version>
 
-  <name>A Camel Route</name>
+  <name>Lambda parser</name>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <log4j2-version>2.19.0</log4j2-version>
   </properties>
-
-  <dependencyManagement>
-    <dependencies>
-      <!-- Camel BOM -->
-      <dependency>
-        <groupId>org.apache.camel</groupId>
-        <artifactId>camel-bom</artifactId>
-        <version>4.0.0-M1</version>
-        <scope>import</scope>
-        <type>pom</type>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
 
   <dependencies>
     <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-lambda -->
@@ -66,6 +53,19 @@
       <artifactId>aws-lambda-java-events</artifactId>
       <version>1.3.0</version>
     </dependency>
+    <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-s3 -->
+    <dependency>
+      <groupId>com.amazonaws</groupId>
+      <artifactId>aws-java-sdk-s3</artifactId>
+      <version>1.12.427</version>
+    </dependency>
+    <dependency>
+      <groupId>com.amazonaws</groupId>
+      <artifactId>aws-java-sdk-core</artifactId>
+      <version>1.11.883</version>
+    </dependency>
+
+
     <!-- Thanks for using https://jar-download.com -->
 
     <!-- logging -->
