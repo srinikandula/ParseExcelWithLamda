@@ -3,23 +3,22 @@ package org.example;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.dynamodbv2.xspec.L;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.S3Event;
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.event.S3EventNotification;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.amazonaws.util.IOUtils;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 
 import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
-import java.util.Map;
 
 public class Handler implements RequestHandler<S3Event, String>{
     @Override
@@ -39,10 +38,11 @@ public class Handler implements RequestHandler<S3Event, String>{
         S3ObjectInputStream data = result.getObjectContent();
         try {
             InputStream stream = new ByteArrayInputStream(IOUtils.toByteArray(data));
-            LoadToMongoDB loadToMongoDB = new LoadToMongoDB();
-            loadToMongoDB.loadToMongo(stream, logger);
-            logger.log("read from file now");
-        } catch (IOException e) {
+            LoadToSQL loadToSQL = new LoadToSQL();
+            logger.log("calling the handler now");
+            loadToSQL.readExcelData(stream, logger);
+            logger.log("calling the handler END");
+        } catch (IOException | SQLException e) {
             e.printStackTrace();
         }
         String response = new String("This is working, 200 OK");
@@ -50,11 +50,9 @@ public class Handler implements RequestHandler<S3Event, String>{
     }
 
     public static void main(String[] args) throws SQLException, IOException {
-        /*Handler handler = new Handler();
-        handler.handleRequest(null, null);*/
-
         LoadToSQL loadToSQL = new LoadToSQL();
-        loadToSQL.readExcelData(null);
+        FileInputStream fis = new FileInputStream("/Users/srinikandula/Downloads/4lakhs_records.xlsx");
+        loadToSQL.readExcelData(fis, null);
     }
 }
 
